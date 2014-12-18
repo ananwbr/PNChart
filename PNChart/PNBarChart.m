@@ -14,6 +14,7 @@
 @interface PNBarChart () {
     NSMutableArray *_xChartLabels;
     NSMutableArray *_yChartLabels;
+    NSMutableArray *_xCountLabels;
 }
 
 - (UIColor *)barColorAtIndex:(NSUInteger)index;
@@ -34,6 +35,7 @@
         _labelTextColor      = [UIColor grayColor];
         _labelFont           = [UIFont systemFontOfSize:11.0f];
         _xChartLabels        = [NSMutableArray array];
+        _xCountLabels        = [NSMutableArray array];
         _yChartLabels        = [NSMutableArray array];
         _bars                = [NSMutableArray array];
         _xLabelSkip          = 1;
@@ -66,6 +68,7 @@
         _yLabels = [NSMutableArray new];
     }
     
+    /*
     if (_showLabel) {
         //Add y labels
         
@@ -89,6 +92,7 @@
             
         }
     }
+     */
 }
 
 -(void)updateChartData:(NSArray *)data{
@@ -158,9 +162,10 @@
 
 - (void)updateBar
 {
+    [self viewCleanupForCollection:_xCountLabels];
     
     //Add bars
-    CGFloat chartCavanHeight = self.frame.size.height - _chartMargin * 2 - xLabelHeight;
+    CGFloat chartCavanHeight = self.frame.size.height - _chartMargin * 2 - xLabelHeight * 2 + 5;
     NSInteger index = 0;
     
     for (NSNumber *valueString in _yValues) {
@@ -225,6 +230,22 @@
         }
         bar.grade = grade;
         
+        //add count labels
+        if (value > 0) {
+            NSString *labelText = [NSString stringWithFormat:@"%1.f", value];
+            PNChartLabel * label = [[PNChartLabel alloc] initWithFrame:CGRectZero];
+            label.font = _labelFont;
+            label.textColor = _labelTextColor;
+            [label setTextAlignment:NSTextAlignmentCenter];
+            label.text = labelText;
+            [label sizeToFit];
+            
+            label.center = CGPointMake(bar.center.x,label.frame.size.height / 2.0);
+            
+            [_xCountLabels addObject:label];
+            [self addSubview:label];
+        }
+        
         index += 1;
     }
 }
@@ -234,6 +255,7 @@
     //Add Labels
 
     [self viewCleanupForCollection:_bars];
+    [self viewCleanupForCollection:_xCountLabels];
 
 
     //Update Bar
